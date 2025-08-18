@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define MAX 100
+#define INF INT_MAX
+
+int graph[MAX][MAX];
+int numVertices;
+
+// Function to find the vertex with the minimum distance value
+int minDistance(int dist[], bool visited[]) {
+    int min = INF, minIndex;
+
+    for (int v = 1; v <= numVertices; v++) {
+        if (!visited[v] && dist[v] <= min) {
+            min = dist[v];
+            minIndex = v;
+        }
+    }
+    return minIndex;
+}
+
+// Function to print the path from source to j using parent array
+void printPath(int parent[], int j) {
+    if (parent[j] == -1) {
+        printf("%d", j);
+        return;
+    }
+
+    printPath(parent, parent[j]);
+    printf("<-%d", j);
+}
+
+void dijkstra(int src) {
+    int dist[MAX];         // Distance from source to i
+    bool visited[MAX];     // Visited vertices
+    int parent[MAX];       // To store shortest path tree
+
+    for (int i = 1; i <= numVertices; i++) {
+        dist[i] = INF;
+        visited[i] = false;
+        parent[i] = -1;
+    }
+
+    dist[src] = 0;
+
+    for (int count = 1; count <= numVertices - 1; count++) {
+        int u = minDistance(dist, visited);
+        visited[u] = true;
+
+        for (int v = 1; v <= numVertices; v++) {
+            if (!visited[v] && graph[u][v] && dist[u] != INF &&
+                dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+                parent[v] = u;
+            }
+        }
+    }
+
+    printf("Node\tDistance\tPath\n");
+    for (int i = 1; i <= numVertices; i++) {
+        if (i == src) continue;
+        printf("  %d\t", i);
+        if (dist[i] == INF) {
+            printf("INF\t\tNO PATH\n");
+        } else {
+            printf("%d\t\t", dist[i]);
+            printPath(parent, i);
+            printf("\n");
+        }
+    }
+}
+
+int main() {
+    int numEdges;
+    printf("Enter the number of vertices : ");
+    scanf("%d", &numVertices);
+
+    printf("Enter the number of edges : ");
+    scanf("%d", &numEdges);
+
+    // Initialize graph
+    for (int i = 1; i <= numVertices; i++) {
+        for (int j = 1; j <= numVertices; j++) {
+            graph[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < numEdges; i++) {
+        int u, v, w;
+        printf("Enter source : ");
+        scanf("%d", &u);
+        printf("Enter destination : ");
+        scanf("%d", &v);
+        printf("Enter weight : ");
+        scanf("%d", &w);
+        graph[u][v] = w;  // Directed graph
+    }
+
+    int source;
+    printf("Enter the source :");
+    scanf("%d", &source);
+
+    dijkstra(source);
+
+    return 0;
+}
